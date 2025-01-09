@@ -46,5 +46,13 @@ jobs:
         run: |
           # Authenticate Docker to Amazon ECR
           aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $IMAGE
+          
+          # Pull the image
           docker pull $IMAGE
-          docker run -d $IMAGE
+
+          # Stop and remove any running container using the same image
+          docker ps -q --filter "ancestor=$IMAGE" | xargs -r docker stop
+          docker ps -aq --filter "ancestor=$IMAGE" | xargs -r docker rm
+
+          # Run the container with port mapping
+          docker run -d -p 80:80 $IMAGE
