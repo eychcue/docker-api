@@ -55,9 +55,13 @@ jobs:
             # Pull the latest image
             docker pull $IMAGE
 
-            # Stop and remove any running container using the same image
+            # Stop and remove any running container using port 80
             docker ps -q --filter "ancestor=$IMAGE" | xargs -r docker stop
             docker ps -aq --filter "ancestor=$IMAGE" | xargs -r docker rm
+            
+            # Remove any container using port 80 (if applicable)
+            docker ps --filter "publish=80" -q | xargs -r docker stop
+            docker ps --filter "publish=80" -q | xargs -r docker rm
 
             # Run the new container with port mapping
             docker run -d -p 80:80 $IMAGE
